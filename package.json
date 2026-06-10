@@ -1,0 +1,27 @@
+{
+  "name": "corpus-finisher",
+  "version": "1.0.0",
+  "description": "Pad and finalize normalized voice clips for Corpus Voces training",
+  "type": "module",
+  "main": "src/index.js",
+  "bin": {
+    "corpus-finisher": "src/cli.js"
+  },
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "scripts": {
+    "test": "node --test tests/**/*.test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "audio",
+    "corpus-voces",
+    "voice",
+    "padding",
+    "training"
+  ],
+  "license": "MIT"
+}
