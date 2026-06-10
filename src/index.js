@@ -21,9 +21,15 @@ export {
 export {
   readManifest,
   writeManifest,
+  cloneManifest,
   appendProcessing,
+  buildStageManifest,
+  applyClipQc,
   manifestReportContext,
   enrichReportEntry,
+  resolveStageManifestPath,
+  STAGE_MANIFEST_FILENAME,
+  STAGE_KEY,
   PACKAGE_VERSION,
 } from './manifestUtils.js';
 export { finalizeCorpus } from './finalizeCorpus.js';

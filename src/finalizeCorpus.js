@@ -9,10 +9,11 @@ import {
 import { assertFfmpegAvailable, probeAudio } from './ffmpegUtils.js';
 import {
   PACKAGE_VERSION,
-  appendProcessing,
+  buildStageManifest,
   enrichReportEntry,
   manifestReportContext,
   readManifest,
+  resolveStageManifestPath,
   writeManifest,
 } from './manifestUtils.js';
 import { expectedDurationSec, padAudio } from './padAudio.js';
@@ -28,6 +29,7 @@ import { writeReports } from './writeReports.js';
  * @property {number} [trailingPadMs]
  * @property {number} [fadeMs]
  * @property {string} [manifestPath]
+ * @property {boolean} [writeSourceManifest]
  * @property {boolean} [dryRun]
  * @property {typeof padAudio} [padFn]
  * @property {typeof analyzeClip} [analyzeFn]
@@ -39,6 +41,7 @@ import { writeReports } from './writeReports.js';
  * @property {Record<string, number>} summary
  * @property {string[]} failures
  * @property {boolean} dryRun
+ * @property {string | null} stageManifestPath
  */
 
 /**
@@ -56,6 +59,7 @@ export async function finalizeCorpus(options) {
     fadeMs = DEFAULTS.fadeMs,
     dryRun = false,
     manifestPath,
+    writeSourceManifest = false,
     padFn = padAudio,
     analyzeFn = analyzeClip,
   } = options;
@@ -195,15 +199,29 @@ export async function finalizeCorpus(options) {
     manifestContext: manifest ? manifestReportContext(manifest) : null,
   });
 
-  if (manifest && manifestPath) {
-    const updated = appendProcessing(manifest, 'corpus_finisher', {
-      version: PACKAGE_VERSION,
-      leading_pad_ms: leadingPadMs,
-      trailing_pad_ms: trailingPadMs,
-      fade_ms: fadeMs,
-      completed_at: new Date().toISOString(),
+  let stageManifestPath = null;
+  if (manifest) {
+    const resolvedSourceManifest = manifestPath ? path.resolve(manifestPath) : null;
+    const stageManifest = buildStageManifest({
+      manifest,
+      qcEntries: entries,
+      qcSummary: report.summary,
+      processingData: {
+        version: PACKAGE_VERSION,
+        leading_pad_ms: leadingPadMs,
+        trailing_pad_ms: trailingPadMs,
+        fade_ms: fadeMs,
+        completed_at: new Date().toISOString(),
+      },
+      sourceManifestPath: resolvedSourceManifest ?? undefined,
     });
-    await writeManifest(path.resolve(manifestPath), updated);
+
+    stageManifestPath = resolveStageManifestPath(outputDir);
+    await writeManifest(stageManifestPath, stageManifest);
+
+    if (writeSourceManifest && resolvedSourceManifest) {
+      await writeManifest(resolvedSourceManifest, stageManifest);
+    }
   }
 
   return {
@@ -211,5 +229,6 @@ export async function finalizeCorpus(options) {
     summary: report.summary,
     failures,
     dryRun,
+    stageManifestPath,
   };
 }

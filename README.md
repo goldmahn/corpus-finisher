@@ -31,7 +31,11 @@ corpus-finisher ./normalized_clips ./training_clips --pad 80
 corpus-finisher ./normalized_clips ./training_clips --leading-pad 75 --trailing-pad 100
 corpus-finisher ./normalized_clips ./training_clips --fade 0
 corpus-finisher ./normalized_clips ./training_clips --dry-run
+corpus-finisher ./normalized_clips ./training_clips --manifest ./manifest.json
+corpus-finisher ./normalized_clips ./training_clips --manifest ./manifest.json --write-source-manifest
 ```
+
+With `--manifest`, writes `manifest.final.json` into the output folder without overwriting the source manifest unless `--write-source-manifest` is set.
 
 ### Expected folder layout
 
@@ -88,7 +92,7 @@ npm test
 
 ## Manifest inheritance
 
-When invoked by VoiceClipper, `--manifest` is supplied automatically. Corpus Finisher reads the manifest, preserves speaker/session metadata in reports, and appends `processing.corpus_finisher` to the session manifest.
+When invoked by VoiceClipper, `--manifest` is supplied automatically. By default Corpus Finisher writes `manifest.final.json` into the output folder and does **not** overwrite the source manifest. Use `--write-source-manifest` to update the source file in place.
 
 ## Architecture
 

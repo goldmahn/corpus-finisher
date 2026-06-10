@@ -15,3 +15,16 @@ test('parseCliArgs supports pad and fade overrides', () => {
   assert.equal(args.trailingPadMs, 80);
   assert.equal(args.fadeMs, 0);
 });
+
+test('parseCliArgs supports manifest and write-source-manifest flags', () => {
+  const args = parseCliArgs([
+    './normalized',
+    './training',
+    '--manifest',
+    './manifest.json',
+    '--write-source-manifest',
+  ]);
+
+  assert.equal(args.manifestPath, './manifest.json');
+  assert.equal(args.writeSourceManifest, true);
+});

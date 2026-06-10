@@ -20,6 +20,7 @@ Options:
   --report <folder>   Report output folder (default: ../reports relative to output)
   --dry-run           Analyze without writing finalized files
   --manifest <path>   VoiceClipper manifest.json to preserve and extend
+  --write-source-manifest  Also update the source manifest file in place
   --help, -h          Show this help message
 
 Examples:
@@ -40,6 +41,7 @@ export function parseCliArgs(argv) {
   let reportFolder;
   let dryRun = false;
   let manifestPath;
+  let writeSourceManifest = false;
   let help = false;
 
   for (let i = 0; i < argv.length; i += 1) {
@@ -111,6 +113,11 @@ export function parseCliArgs(argv) {
       continue;
     }
 
+    if (arg === '--write-source-manifest') {
+      writeSourceManifest = true;
+      continue;
+    }
+
     if (arg.startsWith('-')) {
       throw new Error(`Unknown option: ${arg}`);
     }
@@ -139,6 +146,7 @@ export function parseCliArgs(argv) {
     fadeMs,
     dryRun,
     manifestPath,
+    writeSourceManifest,
   };
 }
 
