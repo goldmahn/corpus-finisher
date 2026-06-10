@@ -86,6 +86,10 @@ Clips that were **REVIEW** in LUFS Buff for low silence should typically become 
 npm test
 ```
 
+## Manifest inheritance
+
+When invoked by VoiceClipper, `--manifest` is supplied automatically. Corpus Finisher reads the manifest, preserves speaker/session metadata in reports, and appends `processing.corpus_finisher` to the session manifest.
+
 ## Architecture
 
 ```text

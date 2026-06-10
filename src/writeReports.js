@@ -29,6 +29,7 @@ export async function writeReports({
   trailingPadMs,
   entries,
   dryRun = false,
+  manifestContext = null,
 }) {
   await fs.mkdir(reportFolder, { recursive: true });
 
@@ -39,6 +40,7 @@ export async function writeReports({
     dryRun,
     summary: summarizeEntries(entries),
     clips: entries,
+    ...(manifestContext ?? {}),
   };
 
   const jsonPath = path.join(reportFolder, 'finalize-report.json');

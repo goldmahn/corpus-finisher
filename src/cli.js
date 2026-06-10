@@ -19,6 +19,7 @@ Options:
   --fade <ms>         Edge fade duration (default: ${DEFAULTS.fadeMs}, 0 to disable)
   --report <folder>   Report output folder (default: ../reports relative to output)
   --dry-run           Analyze without writing finalized files
+  --manifest <path>   VoiceClipper manifest.json to preserve and extend
   --help, -h          Show this help message
 
 Examples:
@@ -38,6 +39,7 @@ export function parseCliArgs(argv) {
   let fadeMs = DEFAULTS.fadeMs;
   let reportFolder;
   let dryRun = false;
+  let manifestPath;
   let help = false;
 
   for (let i = 0; i < argv.length; i += 1) {
@@ -100,6 +102,15 @@ export function parseCliArgs(argv) {
       continue;
     }
 
+    if (arg === '--manifest') {
+      manifestPath = argv[i + 1];
+      if (!manifestPath) {
+        throw new Error('Missing value for --manifest');
+      }
+      i += 1;
+      continue;
+    }
+
     if (arg.startsWith('-')) {
       throw new Error(`Unknown option: ${arg}`);
     }
@@ -127,6 +138,7 @@ export function parseCliArgs(argv) {
     trailingPadMs,
     fadeMs,
     dryRun,
+    manifestPath,
   };
 }
 

@@ -18,5 +18,13 @@ export {
   FfmpegNotFoundError,
   probeAudio,
 } from './ffmpegUtils.js';
+export {
+  readManifest,
+  writeManifest,
+  appendProcessing,
+  manifestReportContext,
+  enrichReportEntry,
+  PACKAGE_VERSION,
+} from './manifestUtils.js';
 export { finalizeCorpus } from './finalizeCorpus.js';
 export { parseCliArgs } from './cli.js';

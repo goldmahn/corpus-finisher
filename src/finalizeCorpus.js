@@ -7,6 +7,14 @@ import {
   ensureFolder,
 } from './fileUtils.js';
 import { assertFfmpegAvailable, probeAudio } from './ffmpegUtils.js';
+import {
+  PACKAGE_VERSION,
+  appendProcessing,
+  enrichReportEntry,
+  manifestReportContext,
+  readManifest,
+  writeManifest,
+} from './manifestUtils.js';
 import { expectedDurationSec, padAudio } from './padAudio.js';
 import { buildReportEntry, classifyClip } from './qcRules.js';
 import { writeReports } from './writeReports.js';
@@ -19,6 +27,7 @@ import { writeReports } from './writeReports.js';
  * @property {number} [leadingPadMs]
  * @property {number} [trailingPadMs]
  * @property {number} [fadeMs]
+ * @property {string} [manifestPath]
  * @property {boolean} [dryRun]
  * @property {typeof padAudio} [padFn]
  * @property {typeof analyzeClip} [analyzeFn]
@@ -46,6 +55,7 @@ export async function finalizeCorpus(options) {
     trailingPadMs = DEFAULTS.trailingPadMs,
     fadeMs = DEFAULTS.fadeMs,
     dryRun = false,
+    manifestPath,
     padFn = padAudio,
     analyzeFn = analyzeClip,
   } = options;
@@ -55,6 +65,11 @@ export async function finalizeCorpus(options) {
   const inputDir = path.resolve(inputFolder);
   const outputDir = path.resolve(outputFolder);
   const reportDir = path.resolve(reportFolder);
+
+  let manifest = null;
+  if (manifestPath) {
+    manifest = await readManifest(path.resolve(manifestPath));
+  }
 
   const wavFiles = await discoverWavFiles(inputDir);
   const failures = [];
@@ -132,13 +147,24 @@ export async function finalizeCorpus(options) {
       });
 
       entries.push(
-        buildReportEntry(qcAnalysis, qc, {
-          filename,
-          leadingPadMs,
-          trailingPadMs,
-          sourceDurationSec,
-          outputDurationSec,
-        })
+        manifest
+          ? enrichReportEntry(
+              buildReportEntry(qcAnalysis, qc, {
+                filename,
+                leadingPadMs,
+                trailingPadMs,
+                sourceDurationSec,
+                outputDurationSec,
+              }),
+              manifest
+            )
+          : buildReportEntry(qcAnalysis, qc, {
+              filename,
+              leadingPadMs,
+              trailingPadMs,
+              sourceDurationSec,
+              outputDurationSec,
+            })
       );
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
@@ -166,7 +192,19 @@ export async function finalizeCorpus(options) {
     trailingPadMs,
     entries,
     dryRun,
+    manifestContext: manifest ? manifestReportContext(manifest) : null,
   });
+
+  if (manifest && manifestPath) {
+    const updated = appendProcessing(manifest, 'corpus_finisher', {
+      version: PACKAGE_VERSION,
+      leading_pad_ms: leadingPadMs,
+      trailing_pad_ms: trailingPadMs,
+      fade_ms: fadeMs,
+      completed_at: new Date().toISOString(),
+    });
+    await writeManifest(path.resolve(manifestPath), updated);
+  }
 
   return {
     clips: entries,
