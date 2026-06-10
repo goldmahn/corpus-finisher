@@ -1,6 +1,6 @@
 {
   "name": "corpus-finisher",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Pad and finalize normalized voice clips for Corpus Voces training",
   "type": "module",
   "main": "src/index.js",
